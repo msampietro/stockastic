@@ -1,45 +1,45 @@
 from datetime import datetime, timedelta
 
-DIRECTION_ABOVE = 'above'
-DIRECTION_BELOW = 'below'
+BEARISH_TYPE = "BEARISH"
+BULLISH_TYPE = "BULLISH"
 
-def check_prices_ma(close_prices, mas_array, days, threshold, direction=DIRECTION_ABOVE):
+def check_prices_ma(close_prices, mas_array, days, threshold, type):
     sampled_close_prices = get_sampled_data(close_prices, days)
-    if direction == DIRECTION_ABOVE:
+    if type == BULLISH_TYPE:
         percentage_array = [
             (sampled_close_prices >= get_sampled_data(ma, days)).mean() * 100
             for ma in mas_array
         ]
-    elif direction == DIRECTION_BELOW:
+    elif type == BEARISH_TYPE:
         percentage_array = [
             (sampled_close_prices <= get_sampled_data(ma, days)).mean() * 100
             for ma in mas_array
         ]
     else:
-        raise ValueError("Direction must be 'above' or 'below'")
+        raise ValueError("Invalid 'type' argument")
     average_percentage = sum(percentage_array) / len(percentage_array)
     return average_percentage >= threshold, average_percentage
 
-def check_rsi_cross(rsi, threshold, direction=DIRECTION_ABOVE):
+def check_rsi_cross(rsi, threshold, type):
     last_rsi = rsi.iloc[-1]
     prev_rsi = rsi.iloc[-2]
-    if direction == DIRECTION_ABOVE:
+    if type == BULLISH_TYPE:
         return (prev_rsi < threshold and last_rsi > threshold), prev_rsi, last_rsi
-    elif direction == DIRECTION_BELOW:
+    elif type == BEARISH_TYPE:
         return (prev_rsi > threshold and last_rsi < threshold), prev_rsi, last_rsi
     else:
-        raise ValueError("Direction must be 'above' or 'below'")
+        raise ValueError("Invalid 'type' argument")
 
-def check_stochastic_threshold(k, d, threshold, condition=DIRECTION_BELOW):
+def check_stochastic_threshold(k, d, threshold, type):
     last_k = k.iloc[-1]
     last_d = d.iloc[-1]
     avg = (last_k + last_d) / 2
-    if condition == DIRECTION_BELOW:
+    if type == BULLISH_TYPE:
         return avg < threshold, last_k, last_d
-    elif condition == DIRECTION_ABOVE:
+    elif type == BEARISH_TYPE:
         return avg > threshold, last_k, last_d
     else:
-        raise ValueError("Condition must be 'below' or 'above'")
+        raise ValueError("Invalid 'type' argument")
 
 def check_adx_above_threshold(adx, days, adx_threshold, percentage_threshold):
     # Check if ADX has been higher than the threshold most of the time during the period

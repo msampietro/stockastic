@@ -1,27 +1,25 @@
-import warnings
 import pandas as pd
-import json
 
 from datetime import datetime, timedelta
 from twelvedata import TDClient
+
+TZ = "America/Argentina/Cordoba"
 
 # https://github.com/twelvedata/twelvedata-python
 td = TDClient(apikey="")
 
 def perform_get_historical_data_request(symbol, days):
-    with warnings.catch_warnings():
-        warnings.simplefilter(action='ignore', category=FutureWarning)
-        end_date = datetime.now().strftime('%Y-%m-%d 23:59:59')
-        start_date = (datetime.now() - timedelta(days=days)).strftime('%Y-%m-%d 00:00:00')
-        ts = td.time_series(start_date=start_date,
-                            end_date=end_date,
-                            outputsize=541,
-                            symbol=symbol,
-                            interval="1day",
-                            timezone="America/Argentina/Cordoba",
-                            order="asc"
-        )
-        return ts.as_pandas()
+    end_date = datetime.now().strftime('%Y-%m-%d 23:59:59')
+    start_date = (datetime.now() - timedelta(days=days)).strftime('%Y-%m-%d 00:00:00')
+    ts = td.time_series(start_date=start_date,
+                        end_date=end_date,
+                        outputsize=541,
+                        symbol=symbol,
+                        interval="1day",
+                        timezone=TZ,
+                        order="asc"
+    )
+    return ts.as_pandas()
 
 def get_historical_data(symbol, days):
     df = perform_get_historical_data_request(symbol, days)
